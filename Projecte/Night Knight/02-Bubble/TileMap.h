@@ -26,10 +26,12 @@ public:
 	~TileMap();
 
 	void render() const;
+	void activate(const int coords);
 	void free();
 	
 	int getTileSizex() const { return tileSizex; }
 	int getTileSizey() const { return tileSizey; }
+	int getTotalPlates() const { return nPlates; }
 
 	bool collisionMoveLeft(const glm::ivec2 &pos, const glm::ivec2 &size) const;
 	bool collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) const;
@@ -49,6 +51,7 @@ private:
 	Texture tilesheet;
 	glm::vec2 tileTexSize;
 	int *map;
+	int nPlates;
 
 };
 

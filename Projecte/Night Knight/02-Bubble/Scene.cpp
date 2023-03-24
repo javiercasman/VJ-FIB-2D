@@ -30,6 +30,8 @@ Scene::~Scene()
 void Scene::init()
 {
 	initShaders();
+
+
 	map = TileMap::createTileMap("levels/level01.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram);

@@ -39,6 +39,14 @@ void TileMap::render() const
 	glDisable(GL_TEXTURE_2D);
 }
 
+void TileMap::activate(const int coords)
+{
+	map[coords] = 4;//lo pasamos a 4 para que en la matriz conste como que está activa
+	//ahora hay que actualizar el sprite
+	//hay que pasar como parámetro los parámetros de prepareArrays (variables de clase maybe?)
+	//y actualizar sprite
+}
+
 void TileMap::free()
 {
 	glDeleteBuffers(1, &vbo);
@@ -76,17 +84,20 @@ bool TileMap::loadLevel(const string &levelFile)
 	sstream.str(line);
 	sstream >> tilesheetSize.x >> tilesheetSize.y;
 	tileTexSize = glm::vec2(1.f / tilesheetSize.x, 1.f / tilesheetSize.y);
-	
+	nPlates = 0;
 	map = new int[mapSize.x * mapSize.y];
 	for(int j=0; j<mapSize.y; j++)
 	{
 		for(int i=0; i<mapSize.x; i++)
 		{
 			fin.get(tile);
-			if(tile == ' ')
-				map[j*mapSize.x+i] = 0;
-			else
-				map[j*mapSize.x+i] = tile - int('0');
+			if (tile == ' ')
+				map[j * mapSize.x + i] = 0;
+			else {
+				if (tile == '3')
+					++nPlates;
+				map[j * mapSize.x + i] = tile - int('0');
+			}
 		}
 		fin.get(tile);
 #ifndef _WIN32
@@ -160,7 +171,7 @@ bool TileMap::collisionMoveLeft(const glm::ivec2 &pos, const glm::ivec2 &size) c
 	y1 = (pos.y + size.y - 1) / tileSizey;
 	for(int y=y0; y<=y1; y++)
 	{
-		if(map[y*mapSize.x+x] != 0)
+		if (map[y * mapSize.x + x] != 0 && map[y * mapSize.x + x] != 3)
 			return true;
 	}
 	
@@ -176,7 +187,7 @@ bool TileMap::collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) 
 	y1 = (pos.y + size.y - 1) / tileSizey;
 	for(int y=y0; y<=y1; y++)
 	{
-		if(map[y*mapSize.x+x] != 0)
+		if(map[y*mapSize.x+x] != 0 && map[y * mapSize.x + x] != 3)
 			return true;
 	}
 	
@@ -192,8 +203,11 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 	y = (pos.y + size.y - 1) / tileSizey;
 	for(int x=x0; x<=x1; x++)
 	{
-		if(map[y*mapSize.x+x] != 0)
+		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
 		{
+			if (map[y * mapSize.x + x] == 3) {
+				//activate(y * mapSize.x + x);
+			}
 			if(*posY - tileSizey * y + size.y <= 4)
 			{
 				*posY = tileSizey * y - size.y;

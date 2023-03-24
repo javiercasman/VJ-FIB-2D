@@ -2,7 +2,7 @@ TILEMAP
 16 22 							-- Size of tile map in tiles
 32 32						-- Tile size & block size
 images/block.png 	-- Tilesheet
-3 1							-- Number of tiles in tilesheet
+4 1							-- Number of tiles in tilesheet
 1111111111111111
 2              2
 1              1
@@ -25,3 +25,4 @@ images/block.png 	-- Tilesheet
 2      22      2
 1333333113333331
 2222222222222222
+-- el número 4 está reservado para el suelo activado
