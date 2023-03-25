@@ -33,6 +33,7 @@ void Scene::init()
 
 
 	map = TileMap::createTileMap("levels/level01.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
+	map_background = TileMapBackground::createTileMapBackground("levels/level01_bckgrnd.txt", glm::vec2(SCREEN_X, SCREEN_Y), texProgram);
 	player = new Player();
 	player->init(glm::ivec2(SCREEN_X, SCREEN_Y), texProgram);
 	player->setPosition(glm::vec2(INIT_PLAYER_X_TILES * map->getTileSizex(), INIT_PLAYER_Y_TILES * map->getTileSizey()));
@@ -58,8 +59,10 @@ void Scene::render()
 	texProgram.setUniformMatrix4f("modelview", modelview);
 	texProgram.setUniform2f("texCoordDispl", 0.f, 0.f);
 	map->render();
+	map_background->render();
 	player->render();
 }
+
 
 void Scene::initShaders()
 {

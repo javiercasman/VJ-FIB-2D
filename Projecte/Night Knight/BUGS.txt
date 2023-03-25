@@ -1,0 +1,1 @@
+- cuando saltas tocando el techo, al caer hay reset de animación en plena caida (otra vez lo de bjumping...) ARREGLADO, era el tema de los angulos

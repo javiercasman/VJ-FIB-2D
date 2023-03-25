@@ -71,6 +71,15 @@ void TileMap::activate(const int i, const int j)
 	vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[1].y);
 	vertices.push_back(posTile.x); vertices.push_back(posTile.y + blockSize);
 	vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[1].y);
+/*
+	//glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	//glGenBuffers(1, &vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	//glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), &vertices[0], GL_STATIC_DRAW);
+	glBufferSubData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), 24 * sizeof(float), &vertices[0]);
+	posLocation = programx.bindVertexAttribute("position", 2, 4 * sizeof(float), 0);
+	texCoordLocation = programx.bindVertexAttribute("texCoord", 2, 4 * sizeof(float), (void*)(2 * sizeof(float)));*/
 }
 
 void TileMap::free()
@@ -197,7 +206,7 @@ bool TileMap::collisionMoveLeft(const glm::ivec2 &pos, const glm::ivec2 &size) c
 	y1 = (pos.y + size.y - 1) / tileSizey;
 	for(int y=y0; y<=y1; y++)
 	{
-		if (map[y * mapSize.x + x] != 0 && map[y * mapSize.x + x] != 3)
+		if (map[y * mapSize.x + x] != 0 && map[y * mapSize.x + x] != 3 && map[y * mapSize.x + x] != 4)
 			return true;
 	}
 	
@@ -213,14 +222,14 @@ bool TileMap::collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) 
 	y1 = (pos.y + size.y - 1) / tileSizey;
 	for(int y=y0; y<=y1; y++)
 	{
-		if(map[y*mapSize.x+x] != 0 && map[y * mapSize.x + x] != 3)
+		if(map[y*mapSize.x+x] != 0 && map[y * mapSize.x + x] != 3 && map[y * mapSize.x + x] != 4)
 			return true;
 	}
 	
 	return false;
 }
 
-bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY) const
+bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY)
 {
 	int x0, x1, y;
 	
@@ -232,7 +241,7 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
 		{
 			if (map[y * mapSize.x + x] == 3) {
-				//activate(x, y);
+				activate(x, y);
 			}
 			if(*posY - tileSizey * y + size.y <= 4)
 			{

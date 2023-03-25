@@ -5,7 +5,6 @@
 #include "Player.h"
 #include "Game.h"
 
-
 #define JUMP_ANGLE_STEP 4
 #define JUMP_HEIGHT 56
 #define FALL_STEP 4
@@ -103,7 +102,7 @@ void Player::update(int deltaTime)
 	if(bJumping)
 	{
 		jumpAngle += JUMP_ANGLE_STEP;
-		if(jumpAngle == 180)//cuando vuelves a la y desde donde has empezado el salto (puede ser suelo o no)
+		if(jumpAngle == 132)//cuando vuelves a la y desde donde has empezado el salto (puede ser suelo o no)
 		{
 			posPlayer.y += FALL_STEP;
 			if (map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y)) 
@@ -120,7 +119,7 @@ void Player::update(int deltaTime)
 		else //cuando estas en pleno salto
 		{
 			posPlayer.y = int(startY - JUMP_HEIGHT * sin(3.14159f * jumpAngle / 135.f));//el numero es 115 pero se bugea :(
-			if (jumpAngle > 90) //cuando estas cayendo
+			if (jumpAngle > 76) //cuando estas cayendo
 				bJumping = !map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y);//el salto se cancela si, mientras caes, colisionas con suelo
 		}
 	}

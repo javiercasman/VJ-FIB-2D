@@ -26,16 +26,16 @@ public:
 	~TileMap();
 
 	void render() const;
-	void activate(const int i, const int j);
+	void activate(int i, int j);
 	void free();
 	
 	int getTileSizex() const { return tileSizex; }
 	int getTileSizey() const { return tileSizey; }
-	int getTotalPlates() const { return nPlates; }
+	int getTotalPlates() const { return nPlates; } //nos servirá para determinar cuando spawnear la llave
 
 	bool collisionMoveLeft(const glm::ivec2 &pos, const glm::ivec2 &size) const;
 	bool collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) const;
-	bool collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY) const;
+	bool collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY);
 	
 private:
 	bool loadLevel(const string &levelFile);
@@ -44,6 +44,8 @@ private:
 private:
 	GLuint vao;
 	GLuint vbo;
+	//GLuint vao2;
+	//GLuint vbo2;
 	GLint posLocation, texCoordLocation;
 	int nTiles;
 	glm::ivec2 position, mapSize, tilesheetSize;
@@ -52,8 +54,8 @@ private:
 	glm::vec2 tileTexSize;
 	int *map;
 	int nPlates;
-	glm::vec2 &minCoordsx; 
-	ShaderProgram& programx;
+	glm::vec2 &minCoordsx = glm::vec2(0,0);
+	ShaderProgram& programx = ShaderProgram();//habra que cambiarlo
 };
 
 

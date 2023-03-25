@@ -1,0 +1,28 @@
+TILEMAP
+16 22 							-- Size of tile map in tiles
+32 32						-- Tile size & block size
+images/block_bckgrnd.png 	-- Tilesheet
+2 1							-- Number of tiles in tilesheet
+                
+ 11111111111111 
+ 22222222222222 
+ 11111111111111 
+ 22222222222222 
+    11111111    
+ 22222222222222 
+ 11111111111111 
+ 222        222 
+ 111111  111111 
+ 222222  222222 
+ 111        111 
+ 11111111111111 
+ 22222222222222 
+ 111        111 
+ 22222222222222 
+ 11111111111111 
+ 222        222 
+ 111111  111111 
+ 222222  222222 
+                
+                
+-- luego probamos si podemos poner una tile debajo de otra para que no esten esos rectangulos negros feos debajo de las baldosas

@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include "ShaderProgram.h"
 #include "TileMap.h"
+#include "TileMapBackground.h"
 #include "Player.h"
 
 
@@ -28,6 +29,7 @@ private:
 
 private:
 	TileMap *map;
+	TileMapBackground *map_background;
 	Player *player;
 	ShaderProgram texProgram;
 	float currentTime;
