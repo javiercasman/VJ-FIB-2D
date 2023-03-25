@@ -1,2 +1,2 @@
-para hacer background, simplemente haz que no haya colision con esas tiles (ya pondremos numeros)
+para hacer background, simplemente haz que no haya colision con esas tiles (ya pondremos numeros) O MEJOR CLASE?
 

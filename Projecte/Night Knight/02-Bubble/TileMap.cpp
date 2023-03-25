@@ -19,6 +19,8 @@ TileMap::TileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProg
 {
 	loadLevel(levelFile);
 	prepareArrays(minCoords, program);
+	minCoordsx = minCoords;
+	programx = program;
 }
 
 TileMap::~TileMap()
@@ -39,12 +41,36 @@ void TileMap::render() const
 	glDisable(GL_TEXTURE_2D);
 }
 
-void TileMap::activate(const int coords)
+void TileMap::activate(const int i, const int j)
 {
-	map[coords] = 4;//lo pasamos a 4 para que en la matriz conste como que está activa
+	//lo pasamos a 4 para que en la matriz conste como que está activa
+	int coords = j * mapSize.x + i;
+	map[coords] = 4;
 	//ahora hay que actualizar el sprite
 	//hay que pasar como parámetro los parámetros de prepareArrays (variables de clase maybe?)
 	//y actualizar sprite
+	glm::vec2 posTile, texCoordTile[2], halfTexel;
+	vector<float> vertices;
+	halfTexel = glm::vec2(0.5f / tilesheet.width(), 0.5f / tilesheet.height());
+	posTile = glm::vec2(minCoordsx.x + i * tileSizex, minCoordsx.y + j * tileSizey);
+	texCoordTile[0] = glm::vec2(float((4 - 1) % tilesheetSize.x) / tilesheetSize.x, float((4 - 1) / tilesheetSize.x) / tilesheetSize.y);
+	texCoordTile[1] = texCoordTile[0] + tileTexSize;
+	//texCoordTile[0] += halfTexel;
+	texCoordTile[1] -= halfTexel;
+	// First triangle
+	vertices.push_back(posTile.x); vertices.push_back(posTile.y);
+	vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[0].y);
+	vertices.push_back(posTile.x + blockSize); vertices.push_back(posTile.y);
+	vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[0].y);
+	vertices.push_back(posTile.x + blockSize); vertices.push_back(posTile.y + blockSize);
+	vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[1].y);
+	// Second triangle
+	vertices.push_back(posTile.x); vertices.push_back(posTile.y);
+	vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[0].y);
+	vertices.push_back(posTile.x + blockSize); vertices.push_back(posTile.y + blockSize);
+	vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[1].y);
+	vertices.push_back(posTile.x); vertices.push_back(posTile.y + blockSize);
+	vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[1].y);
 }
 
 void TileMap::free()
@@ -206,7 +232,7 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
 		{
 			if (map[y * mapSize.x + x] == 3) {
-				//activate(y * mapSize.x + x);
+				//activate(x, y);
 			}
 			if(*posY - tileSizey * y + size.y <= 4)
 			{

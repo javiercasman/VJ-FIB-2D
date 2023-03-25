@@ -26,7 +26,7 @@ public:
 	~TileMap();
 
 	void render() const;
-	void activate(const int coords);
+	void activate(const int i, const int j);
 	void free();
 	
 	int getTileSizex() const { return tileSizex; }
@@ -52,7 +52,8 @@ private:
 	glm::vec2 tileTexSize;
 	int *map;
 	int nPlates;
-
+	glm::vec2 &minCoordsx; 
+	ShaderProgram& programx;
 };
 
 
