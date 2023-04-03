@@ -20,7 +20,7 @@ void Player::init(const glm::ivec2 &tileMapPos, ShaderProgram &shaderProgram)
 {
 	bJumping = false;
 	spritesheet.loadFromFile("images/player.png", TEXTURE_PIXEL_FORMAT_RGBA);
-	sprite = Sprite::createSprite(glm::ivec2(16, 32), glm::vec2(1.f/8.f, 1), &spritesheet, &shaderProgram);
+	sprite = Sprite::createSprite(glm::ivec2(16,32), glm::vec2(1.f/8.f, 1), &spritesheet, &shaderProgram);
 	sprite->setNumberAnimations(6);
 	
 		sprite->setAnimationSpeed(STAND_RIGHT, 6);
@@ -105,7 +105,7 @@ void Player::update(int deltaTime)
 		if(jumpAngle == 132)//cuando vuelves a la y desde donde has empezado el salto (puede ser suelo o no)
 		{
 			posPlayer.y += FALL_STEP;
-			if (map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y)) 
+			if (map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y, true)) 
 			{
 				if (sprite->animation() == JUMP_LEFT)
 					sprite->changeAnimation(STAND_LEFT);
@@ -120,13 +120,13 @@ void Player::update(int deltaTime)
 		{
 			posPlayer.y = int(startY - JUMP_HEIGHT * sin(3.14159f * jumpAngle / 135.f));//el numero es 115 pero se bugea :(
 			if (jumpAngle > 76) //cuando estas cayendo
-				bJumping = !map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y);//el salto se cancela si, mientras caes, colisionas con suelo
+				bJumping = !map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y, true);//el salto se cancela si, mientras caes, colisionas con suelo
 		}
 	}
 	else
 	{
 		posPlayer.y += FALL_STEP;
-		if(map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y)){
+		if(map->collisionMoveDown(posPlayer, glm::ivec2(16, 32), &posPlayer.y, true)){
 			if (falling) falling = false;
 			if (sprite->animation() == JUMP_LEFT)
 				sprite->changeAnimation(STAND_LEFT);
@@ -146,6 +146,9 @@ void Player::update(int deltaTime)
 		else { //cuando está cayendo sin saltar
 			falling = true;
 		}
+	}
+	if (map->collisionMoveUp(posPlayer, glm::ivec2(16, 32))) {
+		int a = 0;
 	}
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posPlayer.x), float(tileMapDispl.y + posPlayer.y)));
 }

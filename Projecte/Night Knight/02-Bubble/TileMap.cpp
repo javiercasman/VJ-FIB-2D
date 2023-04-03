@@ -17,7 +17,7 @@ TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoo
 
 TileMap::TileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
-	loadLevel(levelFile);
+	loadLevel(levelFile+".txt");
 	prepareArrays(minCoords, program);
 	minCoordsx = minCoords;
 	programx = program;
@@ -43,43 +43,35 @@ void TileMap::render() const
 
 void TileMap::activate(const int i, const int j)
 {
-	//lo pasamos a 4 para que en la matriz conste como que está activa
 	int coords = j * mapSize.x + i;
 	map[coords] = 4;
-	//ahora hay que actualizar el sprite
-	//hay que pasar como parámetro los parámetros de prepareArrays (variables de clase maybe?)
-	//y actualizar sprite
-	glm::vec2 posTile, texCoordTile[2], halfTexel;
-	vector<float> vertices;
-	halfTexel = glm::vec2(0.5f / tilesheet.width(), 0.5f / tilesheet.height());
-	posTile = glm::vec2(minCoordsx.x + i * tileSizex, minCoordsx.y + j * tileSizey);
-	texCoordTile[0] = glm::vec2(float((4 - 1) % tilesheetSize.x) / tilesheetSize.x, float((4 - 1) / tilesheetSize.x) / tilesheetSize.y);
-	texCoordTile[1] = texCoordTile[0] + tileTexSize;
-	//texCoordTile[0] += halfTexel;
-	texCoordTile[1] -= halfTexel;
-	// First triangle
-	vertices.push_back(posTile.x); vertices.push_back(posTile.y);
-	vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[0].y);
-	vertices.push_back(posTile.x + blockSize); vertices.push_back(posTile.y);
-	vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[0].y);
-	vertices.push_back(posTile.x + blockSize); vertices.push_back(posTile.y + blockSize);
-	vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[1].y);
-	// Second triangle
-	vertices.push_back(posTile.x); vertices.push_back(posTile.y);
-	vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[0].y);
-	vertices.push_back(posTile.x + blockSize); vertices.push_back(posTile.y + blockSize);
-	vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[1].y);
-	vertices.push_back(posTile.x); vertices.push_back(posTile.y + blockSize);
-	vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[1].y);
-/*
-	//glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao);
-	//glGenBuffers(1, &vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	//glBufferData(GL_ARRAY_BUFFER, 24 * sizeof(float), &vertices[0], GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), 24 * sizeof(float), &vertices[0]);
-	posLocation = programx.bindVertexAttribute("position", 2, 4 * sizeof(float), 0);
-	texCoordLocation = programx.bindVertexAttribute("texCoord", 2, 4 * sizeof(float), (void*)(2 * sizeof(float)));*/
+	++activated;//podriamos ahcerlo desde scene, haciendo esto en  Scene::activate y el resto en esta de aquí
+	prepareArrays(minCoordsx, programx);
+}
+
+bool TileMap::deactivate(const int i, const int j)
+{
+	int x0, x1, y;
+	if (activated == nPlates) return false;
+	x0 = i / tileSizex;
+	x1 = (i + 32 - 1) / tileSizex;
+	y = (j + 32 - 1) / tileSizey;
+	for (int x = x0; x <= x1; x++)
+	{
+		if (map[y * mapSize.x + x] == 4) {
+			map[y * mapSize.x + x] = 3;
+			--activated;
+			prepareArrays(minCoordsx, programx);
+			return true;
+		}
+	}
+	return false;
+}
+
+void TileMap::openDoor() {
+	int coords = doorCoord.y * mapSize.x + doorCoord.x;
+	map[coords] = 6;
+	prepareArrays(minCoordsx, programx);
 }
 
 void TileMap::free()
@@ -100,6 +92,32 @@ bool TileMap::loadLevel(const string &levelFile)
 	getline(fin, line);
 	if(line.compare(0, 7, "TILEMAP") != 0)
 		return false;
+
+	getline(fin, line);
+	if (line.compare(0, 3, "gem") != 0)
+		return false;
+	else {
+		string str = line.substr(4, 2);//siempre será un número de 2 digitos
+		gemSpawnTime = stoi(str);
+	}
+
+	getline(fin, line);
+	if (line.compare(0, 9, "stopwatch") != 0)
+		return false;
+	else {
+		string str = line.substr(10, 2);//siempre será un número de 2 digitos
+		if (str != "XX") stopwatchSpawnTime = stoi(str);//hay niveles donde no hay stopwatch
+		else stopwatchSpawnTime = -1;
+	}
+
+	/*getline(fin, line);
+	if (line.compare(0, 9, "xxxxitem") != 0)
+		return false;
+	else {
+		string str = line.substr(10, 2);//siempre será un número de 2 digitos
+		if (str != "XX") xxxxSpawnTime = stoi(str);
+	}*/
+
 	getline(fin, line);
 	sstream.str(line);
 	sstream >> mapSize.x >> mapSize.y;
@@ -128,9 +146,43 @@ bool TileMap::loadLevel(const string &levelFile)
 			fin.get(tile);
 			if (tile == ' ')
 				map[j * mapSize.x + i] = 0;
+			else if (tile == '7') {
+				map[j * mapSize.x + i] = 0;//esto se podria cambiar
+				//createItem('Key', i * tileSizex, j * tileSizey);
+				itemList.insert_or_assign("Key", glm::vec2(i * tileSizex, j * tileSizey));
+			}
+			else if (tile == '8') {//añadiremos más números según metamos más items
+				map[j * mapSize.x + i] = 0;
+				//createItem('Gem', i * tileSizex, j * tileSizey);
+				itemList.insert_or_assign("Gem", glm::vec2(i * tileSizex, j * tileSizey));//comprobar si insert es suficiente CUANDO TENGAMOS MAS NIVELES
+			}
+			else if (tile == 'S') {//skeleton
+				map[j * mapSize.x + i] = 0;
+				Enemy en;
+				en.type = "skeleton";
+				en.pos[0] = i * tileSizex;
+				en.pos[1] = j * tileSizey;
+				enemyList.push_back(en);
+			}
+			else if (tile == 'V') {//vampire
+				map[j * mapSize.x + i] = 0;
+				Enemy en;
+				en.type = "vampire";
+				en.pos[0] = i * tileSizex;
+				en.pos[1] = j * tileSizey;
+				enemyList.push_back(en);
+			}
+			else if (tile == 'W') {//wizard
+				map[j * mapSize.x + i] = 0;
+				Enemy en;
+				en.type = "wizard";
+				en.pos[0] = i * tileSizex;
+				en.pos[1] = j * tileSizey;
+				enemyList.push_back(en);
+			}
 			else {
-				if (tile == '3')
-					++nPlates;
+				if (tile == '3') ++nPlates;
+				if (tile == '5') doorCoord = glm::ivec2(i, j);
 				map[j * mapSize.x + i] = tile - int('0');
 			}
 		}
@@ -159,6 +211,7 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 			tile = map[j * mapSize.x + i];
 			if(tile != 0)
 			{
+				//if (tile == 5 || tile == 6) tileSizey *= 2;
 				// Non-empty tile
 				nTiles++;
 				posTile = glm::vec2(minCoords.x + i * tileSizex, minCoords.y + j * tileSizey);
@@ -180,6 +233,7 @@ void TileMap::prepareArrays(const glm::vec2 &minCoords, ShaderProgram &program)
 				vertices.push_back(texCoordTile[1].x); vertices.push_back(texCoordTile[1].y);
 				vertices.push_back(posTile.x); vertices.push_back(posTile.y + blockSize);
 				vertices.push_back(texCoordTile[0].x); vertices.push_back(texCoordTile[1].y);
+				//if (tile == 5 || tile == 6) tileSizey /= 2;
 			}
 		}
 	}
@@ -206,7 +260,8 @@ bool TileMap::collisionMoveLeft(const glm::ivec2 &pos, const glm::ivec2 &size) c
 	y1 = (pos.y + size.y - 1) / tileSizey;
 	for(int y=y0; y<=y1; y++)
 	{
-		if (map[y * mapSize.x + x] != 0 && map[y * mapSize.x + x] != 3 && map[y * mapSize.x + x] != 4)
+		if (map[y * mapSize.x + x] != 0 && map[y * mapSize.x + x] != 1 && map[y * mapSize.x + x] != 3 
+			&& map[y * mapSize.x + x] != 4 && map[y * mapSize.x + x] != 5)
 			return true;
 	}
 	
@@ -222,27 +277,33 @@ bool TileMap::collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) 
 	y1 = (pos.y + size.y - 1) / tileSizey;
 	for(int y=y0; y<=y1; y++)
 	{
-		if(map[y*mapSize.x+x] != 0 && map[y * mapSize.x + x] != 3 && map[y * mapSize.x + x] != 4)
+		if(map[y*mapSize.x+x] != 0 && map[y * mapSize.x + x] != 1 && map[y * mapSize.x + x] != 3 
+			&& map[y * mapSize.x + x] != 4 && map[y * mapSize.x + x] != 5)
 			return true;
 	}
 	
 	return false;
 }
 
-bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY)
+bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY, bool player)
 {
 	int x0, x1, y;
 	
 	x0 = pos.x / tileSizex;
 	x1 = (pos.x + size.x - 1) / tileSizex;
-	y = (pos.y + size.y - 1) / tileSizey;
-	for(int x=x0; x<=x1; x++)
-	{
-		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
+	y = (pos.y + size.y - 1) / tileSizey;//las piernas del jugador
+	if (player) {
+		for (int x = x0; x <= x1; x++)
 		{
 			if (map[y * mapSize.x + x] == 3) {
 				activate(x, y);
 			}
+		}
+	}
+	for(int x=x0; x<=x1; x++)
+	{
+		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
+		{
 			if(*posY - tileSizey * y + size.y <= 4)
 			{
 				*posY = tileSizey * y - size.y;
@@ -251,6 +312,23 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 		}
 	}
 	
+	return false;
+}
+
+bool TileMap::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size)
+{
+	int x0, x1, y;
+
+	x0 = pos.x / tileSizex;
+	x1 = (pos.x + size.x - 1) / tileSizex;
+	y = pos.y / tileSizey;
+	for (int x = x0; x <= x1; x++)
+	{
+		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 1 || map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
+		{
+			return true;
+		}
+	}
 	return false;
 }
 

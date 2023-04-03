@@ -1,2 +1,18 @@
 para hacer background, simplemente haz que no haya colision con esas tiles (ya pondremos numeros) O MEJOR CLASE?
 
+
+ITEMS:
+
+gema: aparece 1 vez, depende del nivel a x segundo e y posición, dura 10 segundos.
+
+
+
+colisiones con items/enemigos/puerta:
+
+crearemos una nueva funcion parecida a movecollisionx (en scene), donde pasaremos la posicion del item
+/enemigo/puerta, su tamaño, y la posicion del jugador. si este la toca, pasará algo.
+
+MAGO: desactiva placas (5 SEGUNDOS DE COOLDOWN y si no están todas activadas)
+VAMPIRO: tarda 12 segundos en transformarse, a partir de ahí se desconvierte de manera random (si toca el suelo),
+si es muy chungo podemos hacerlo por tiempo sino
+MURCIELAGO: se mueve en diagonal parriba, sino puede, en diagonal pabajo
