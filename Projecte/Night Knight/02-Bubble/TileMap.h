@@ -7,6 +7,7 @@
 #include "ShaderProgram.h"
 #include <map>
 #include <vector>
+#include "Sound.h"
 
 
 // Class Tilemap is capable of loading a tile map from a text file in a very
@@ -44,9 +45,10 @@ public:
 
 	int getGemSpawnTime() const { return gemSpawnTime; }
 	int getStopwatchSpawnTime() const { return stopwatchSpawnTime; }
-	//int getxxxxSpawnTime() const { return xxxxSpawnTime; }
+	int getHourglassSpawnTime() const { return hourglassSpawnTime; }
 
 	int getActivatedPlates() const { return activated; }
+	glm::ivec2 getDoorCoords() const { return doorCoord; }
 
 	std::map<string, glm::ivec2> getItemList() const { return itemList; }
 
@@ -54,8 +56,12 @@ public:
 	bool collisionMoveRight(const glm::ivec2 &pos, const glm::ivec2 &size) const;
 	bool collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, int *posY, bool player);
 	bool collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size); //para el wizard
+	bool collisionSpikes(const glm::ivec2& pos, const glm::ivec2& size, int* posY);
 
 	void openDoor();
+
+	int GetInitPlayerxTiles() { return init_player_x_tiles; }
+	int GetInitPlayeryTiles() { return init_player_y_tiles; }
 	
 private:
 	bool loadLevel(const string &levelFile);
@@ -64,8 +70,6 @@ private:
 private:
 	GLuint vao;
 	GLuint vbo;
-	//GLuint vao2;
-	//GLuint vbo2;
 	GLint posLocation, texCoordLocation;
 	int nTiles;
 	glm::ivec2 position, mapSize, tilesheetSize, doorCoord;
@@ -73,17 +77,17 @@ private:
 	Texture tilesheet;
 	glm::vec2 tileTexSize;
 	int* map;
-	//int *mapItems;
 	int nPlates, activated = 0;
-	glm::vec2 &minCoordsx = glm::vec2(0,0);
-	ShaderProgram& programx = ShaderProgram();//habra que cambiarlo
+	glm::vec2 &minCoords = glm::vec2(0,0);
+	ShaderProgram& program = ShaderProgram();
 	std::map<string, glm::ivec2> itemList;
 	vector<Enemy> enemyList;
 
 	int gemSpawnTime;
 	int stopwatchSpawnTime;
-	//int xxxxSpawnTime;
-
+	int hourglassSpawnTime;
+	ISoundEngine* engine;
+	int init_player_x_tiles, init_player_y_tiles;
 };
 
 

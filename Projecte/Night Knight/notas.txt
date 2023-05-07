@@ -16,3 +16,18 @@ MAGO: desactiva placas (5 SEGUNDOS DE COOLDOWN y si no están todas activadas)
 VAMPIRO: tarda 12 segundos en transformarse, a partir de ahí se desconvierte de manera random (si toca el suelo),
 si es muy chungo podemos hacerlo por tiempo sino
 MURCIELAGO: se mueve en diagonal parriba, sino puede, en diagonal pabajo
+
+
+1 SEGUNDO DE INVLUNERABILIDAD AL RESPAWNEAR
+
+2 SEGUNDOS MUERTO
+
+FALTA:
+
+Cuando estás en la pantalla de game over, no puedes salir si le das al esc. Programarlo.
+
+Para arreglar las hitbox, simplemente pasar un tilesize menor al del sprite
+
+cuando eres invulnerable:
+   - no tienes hitbox con entidades
+   - parpadeas

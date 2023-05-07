@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include "TileMap.h"
+#include "Game.h"
 
 using namespace std;
 
@@ -17,16 +18,16 @@ TileMap *TileMap::createTileMap(const string &levelFile, const glm::vec2 &minCoo
 
 TileMap::TileMap(const string &levelFile, const glm::vec2 &minCoords, ShaderProgram &program)
 {
-	loadLevel(levelFile+".txt");
+	engine = Sound::instance().getSoundEngine();
+	loadLevel(levelFile + ".txt");
 	prepareArrays(minCoords, program);
-	minCoordsx = minCoords;
-	programx = program;
+	TileMap::minCoords = minCoords;
+	TileMap::program = program;
 }
 
 TileMap::~TileMap()
 {
-	if(map != NULL)
-		delete map;
+	if (map != NULL) delete map;
 }
 
 
@@ -43,35 +44,37 @@ void TileMap::render() const
 
 void TileMap::activate(const int i, const int j)
 {
+	engine->play2D("sounds/activate.ogg");
 	int coords = j * mapSize.x + i;
 	map[coords] = 4;
-	++activated;//podriamos ahcerlo desde scene, haciendo esto en  Scene::activate y el resto en esta de aquí
-	prepareArrays(minCoordsx, programx);
+	++activated;
+	Game::instance().incrPoints(10);
+	prepareArrays(minCoords, program);
 }
 
 bool TileMap::deactivate(const int i, const int j)
 {
-	int x0, x1, y;
+	int x, y;
 	if (activated == nPlates) return false;
-	x0 = i / tileSizex;
-	x1 = (i + 32 - 1) / tileSizex;
+	x = i / tileSizex;
+	//x1 = (i + 32 - 1) / tileSizex;
 	y = (j + 32 - 1) / tileSizey;
-	for (int x = x0; x <= x1; x++)
-	{
+	//for (int x = x0; x <= x1; x++)
+	//{
 		if (map[y * mapSize.x + x] == 4) {
 			map[y * mapSize.x + x] = 3;
 			--activated;
-			prepareArrays(minCoordsx, programx);
+			prepareArrays(minCoords, program);
 			return true;
 		}
-	}
+	//}
 	return false;
 }
 
 void TileMap::openDoor() {
 	int coords = doorCoord.y * mapSize.x + doorCoord.x;
 	map[coords] = 6;
-	prepareArrays(minCoordsx, programx);
+	prepareArrays(minCoords, program);
 }
 
 void TileMap::free()
@@ -107,16 +110,17 @@ bool TileMap::loadLevel(const string &levelFile)
 	else {
 		string str = line.substr(10, 2);//siempre será un número de 2 digitos
 		if (str != "XX") stopwatchSpawnTime = stoi(str);//hay niveles donde no hay stopwatch
-		else stopwatchSpawnTime = -1;
+		else stopwatchSpawnTime = 9999;
 	}
 
-	/*getline(fin, line);
-	if (line.compare(0, 9, "xxxxitem") != 0)
+	getline(fin, line);
+	if (line.compare(0, 9, "hourglass") != 0)
 		return false;
 	else {
 		string str = line.substr(10, 2);//siempre será un número de 2 digitos
-		if (str != "XX") xxxxSpawnTime = stoi(str);
-	}*/
+		if (str != "XX") hourglassSpawnTime = stoi(str);//hay niveles donde no hay hourglass
+		else hourglassSpawnTime = 9999;
+	}
 
 	getline(fin, line);
 	sstream.str(line);
@@ -146,15 +150,26 @@ bool TileMap::loadLevel(const string &levelFile)
 			fin.get(tile);
 			if (tile == ' ')
 				map[j * mapSize.x + i] = 0;
-			else if (tile == '7') {
-				map[j * mapSize.x + i] = 0;//esto se podria cambiar
-				//createItem('Key', i * tileSizex, j * tileSizey);
+			else if (tile == 'K') {
+				map[j * mapSize.x + i] = 0;
 				itemList.insert_or_assign("Key", glm::vec2(i * tileSizex, j * tileSizey));
 			}
-			else if (tile == '8') {//añadiremos más números según metamos más items
+			else if (tile == 'G') {
 				map[j * mapSize.x + i] = 0;
-				//createItem('Gem', i * tileSizex, j * tileSizey);
-				itemList.insert_or_assign("Gem", glm::vec2(i * tileSizex, j * tileSizey));//comprobar si insert es suficiente CUANDO TENGAMOS MAS NIVELES
+				itemList.insert_or_assign("Gem", glm::vec2(i * tileSizex, j * tileSizey));
+			}
+			else if (tile == 'R') {
+				map[j * mapSize.x + i] = 0;
+				itemList.insert_or_assign("Stopwatch", glm::vec2(i * tileSizex, j * tileSizey));
+			}
+			else if (tile == 'H') {
+				map[j * mapSize.x + i] = 0;
+				itemList.insert_or_assign("Hourglass", glm::vec2(i * tileSizex, j * tileSizey));
+			}
+			else if (tile == 'P') {//player
+				map[j * mapSize.x + i] = 0;
+				init_player_x_tiles = i;
+				init_player_y_tiles = j;
 			}
 			else if (tile == 'S') {//skeleton
 				map[j * mapSize.x + i] = 0;
@@ -302,7 +317,7 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 	}
 	for(int x=x0; x<=x1; x++)
 	{
-		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
+		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4 || map[y * mapSize.x + x] == 7)))
 		{
 			if(*posY - tileSizey * y + size.y <= 4)
 			{
@@ -315,6 +330,29 @@ bool TileMap::collisionMoveDown(const glm::ivec2 &pos, const glm::ivec2 &size, i
 	return false;
 }
 
+bool TileMap::collisionSpikes(const glm::ivec2& pos, const glm::ivec2& size, int* posY)
+{
+	int x0, x1, y;
+
+	x0 = pos.x / tileSizex;
+	x1 = (pos.x + size.x - 1) / tileSizex;
+	y = (pos.y + size.y - 1) / tileSizey;//las piernas del jugador
+	for (int x = x0; x <= x1; x++)
+	{
+		if (map[y * mapSize.x + x] == 7)
+		{
+			if (*posY - tileSizey * y + size.y <= 4)
+			{
+				*posY = tileSizey * y - size.y;
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
+
 bool TileMap::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size)
 {
 	int x0, x1, y;
@@ -324,7 +362,8 @@ bool TileMap::collisionMoveUp(const glm::ivec2& pos, const glm::ivec2& size)
 	y = pos.y / tileSizey;
 	for (int x = x0; x <= x1; x++)
 	{
-		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 1 || map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4)))
+		if (map[y * mapSize.x + x] != 0 && ((map[y * mapSize.x + x] == 1 || map[y * mapSize.x + x] == 3 || map[y * mapSize.x + x] == 4
+			|| map[y * mapSize.x + x] == 6)))
 		{
 			return true;
 		}

@@ -1,0 +1,14 @@
+Integrants:
+Javier Castaño Mansillas
+
+Funcionalitats implementades:
+-- ITEMS --
+Clau, gemma, cronòmetre, rellotge de sorra
+-- ENEMICS --
+Esquelet, vampir, mag
+
+Les pantalles són el nivell 1 original, el 28, i el 13 modificat (dificultat augmentada)
+Diversos sons que acompanyen al gameplay
+HUD
+Tecles per saltar contingut
+Mecàniques bàsiques i principals del joc

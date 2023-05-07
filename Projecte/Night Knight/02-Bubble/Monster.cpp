@@ -16,7 +16,9 @@ void Monster::init(string type, const glm::ivec2& tileMapPos, ShaderProgram& sha
 	tileMapDispl = tileMapPos;
 	if (type == "skeleton") {
 		powerTime = -1;
+		casting = false;
 		tileSize = glm::ivec2(16, 32);
+		hitboxSize = glm::ivec2(11, 32);
 		sprite = Sprite::createSprite(tileSize, glm::vec2(9.f / 64.f, 15.f/80.f), &spritesheet, &shaderProgram);
 		sprite->setNumberAnimations(2);
 
@@ -30,7 +32,9 @@ void Monster::init(string type, const glm::ivec2& tileMapPos, ShaderProgram& sha
 	}
 	else if (type == "vampire") {
 		powerCooldown = 12.f;//12 segundos de enfriamiento para transformarse
+		casting = false;
 		tileSize = glm::ivec2(16, 32);
+		hitboxSize = glm::ivec2(16, 32);
 		sprite = Sprite::createSprite(tileSize, glm::vec2(9.f / 64.f, 15.f / 80.f), &spritesheet, &shaderProgram);
 		sprite->setNumberAnimations(2);
 
@@ -44,8 +48,10 @@ void Monster::init(string type, const glm::ivec2& tileMapPos, ShaderProgram& sha
 	}
 	else if (type == "bat") {//se crean cuando el vampiro se transforma
 		powerCooldown = 6.f;
+		casting = false;
 		up = true;
 		tileSize = glm::ivec2(32,32);
+		hitboxSize = glm::ivec2(32, 32);
 		sprite = Sprite::createSprite(tileSize, glm::vec2(14.f / 64.f, 14.f/80.f), &spritesheet, &shaderProgram);
 		sprite->setNumberAnimations(2);
 
@@ -62,7 +68,9 @@ void Monster::init(string type, const glm::ivec2& tileMapPos, ShaderProgram& sha
 	}
 	else if (type == "wizard") {//cambiar esto me voy a dormir
 		powerCooldown = 5.0f;//5 segundos de enfriamiento para desactivar baldosas
+		casting = false;
 		tileSize = glm::ivec2(32,32);
+		hitboxSize = glm::ivec2(16, 32);
 		sprite = Sprite::createSprite(tileSize, glm::vec2(16.f / 64.f, 16.f/80.f), &spritesheet, &shaderProgram);
 		sprite->setNumberAnimations(4);
 
@@ -82,7 +90,7 @@ void Monster::init(string type, const glm::ivec2& tileMapPos, ShaderProgram& sha
 		sprite->addKeyframe(CAST_RIGHT, glm::vec2(2 * 16.f / 64.f, 4 * 15.f / 80.f));
 
 		sprite->setAnimationSpeed(CAST_LEFT, 6);
-		sprite->addKeyframe(CAST_LEFT, glm::vec2(3 * 16.f / 64.f, 1 * 15.f / 80.f));
+		sprite->addKeyframe(CAST_LEFT, glm::vec2(3 * 16.f / 64.f, 4 * 15.f / 80.f));
 	}
 	sprite->changeAnimation(0);
 	sprite->setPosition(glm::vec2(float(tileMapDispl.x + posMonster.x), float(tileMapDispl.y + posMonster.y)));
@@ -96,59 +104,85 @@ void Monster::update(int deltaTime)
 			int aux = sprite->animation();
 			delete sprite;
 			init("bat", tileMapDispl, texProgram);
-			powerTime = 0.f;
 			sprite->changeAnimation(aux);
+			casting = true;
 		}
 		else if (type == "bat" && 
 			map->collisionMoveDown(glm::ivec2(posMonster.x, posMonster.y+map->getTileSizey()), tileSize, &posMonster.y, false)) {
 			int aux = sprite->animation();
 			delete sprite;
 			init("vampire", tileMapDispl, texProgram);
-			powerTime = 0.f;
 			sprite->changeAnimation(aux);
+			casting = true;
+			
 		}
-		else if (type == "wizard") {
-			if (map->deactivate(posMonster.x, posMonster.y + FALL_STEP)) {
-				//tenemos que hacer que se quede congelado unos 10/11 frames
+		else if (type == "wizard") {  
+			if (map->deactivate(posMonster.x+16, posMonster.y + FALL_STEP)) {
+				hitboxSize[0] = 32;
 				powerTime = 0.f;
+				casting = true;
 			}
 		}
 	}
 	sprite->update(deltaTime);
 	glm::ivec2 posMonsterLeft = glm::ivec2(posMonster.x - map->getTileSizex(), posMonster.y + FALL_STEP);
 	glm::ivec2 posMonsterRight = glm::ivec2(posMonster.x + map->getTileSizex(), posMonster.y + FALL_STEP);
-	if (sprite->animation() == MOVE_LEFT) {
-		posMonster.x -= 1;
-		if (map->collisionMoveLeft(posMonster, tileSize) || 
-			(!map->collisionMoveDown(posMonsterLeft, tileSize, &posMonsterLeft.y, false) && type != "bat"))
-		{
-			posMonster.x += 1;
-			sprite->changeAnimation(sprite->animation() - 1);
+	if (casting) {
+		if (type == "wizard") {
+			if (sprite->animation() == MOVE_LEFT) sprite->changeAnimation(CAST_LEFT);
+			else if (sprite->animation() == MOVE_RIGHT) sprite->changeAnimation(CAST_RIGHT);
+			if (pauseTime / 1000.f >= 0.5f) {
+				hitboxSize[0] = 16;
+				casting = false;
+				pauseTime = 0.f;
+				if (sprite->animation() == CAST_LEFT) sprite->changeAnimation(MOVE_LEFT);
+				else if (sprite->animation() == CAST_RIGHT) sprite->changeAnimation(MOVE_RIGHT);
+			}
+			else pauseTime += deltaTime;
+		}
+		else if (type == "bat" || type == "vampire") {
+			if (pauseTime / 1000.f >= 0.5f) {
+				casting = false;
+				powerTime = 0.f;
+				pauseTime = 0.f;
+			}
+			else pauseTime += deltaTime;
 		}
 	}
-	else if (sprite->animation() == MOVE_RIGHT) {
-		posMonster.x += 1;
-		if (map->collisionMoveRight(posMonster, tileSize) ||
-			(!map->collisionMoveDown(posMonsterRight, tileSize, &posMonsterRight.y, false) && type != "bat"))
-		{
+	else {
+		if (sprite->animation() == MOVE_LEFT) {
 			posMonster.x -= 1;
-			sprite->changeAnimation(sprite->animation() + 1);
-		}
-	}
-	if (type == "bat") {
-		if (up) {
-			posMonster.y -= 1;
-			if (map->collisionMoveUp(posMonster, tileSize)) {
- 				posMonster.y += 1;
-				up = false;
+			if (map->collisionMoveLeft(posMonster, tileSize) ||
+				(!map->collisionMoveDown(posMonsterLeft, tileSize, &posMonsterLeft.y, false) && type != "bat"))
+			{
+				posMonster.x += 1;
+				sprite->changeAnimation(sprite->animation() - 1);
 			}
 		}
-		else {
-			posMonster.y += 1;
-			glm::ivec2 pos = glm::ivec2(posMonster.x, posMonster.y + 1);//para hacer bien la colision con el suelo
-			if (map->collisionMoveDown(pos, tileSize, &posMonster.y, false)) {
+		else if (sprite->animation() == MOVE_RIGHT) {
+			posMonster.x += 1;
+			if (map->collisionMoveRight(posMonster, tileSize) ||
+				(!map->collisionMoveDown(posMonsterRight, tileSize, &posMonsterRight.y, false) && type != "bat"))
+			{
+				posMonster.x -= 1;
+				sprite->changeAnimation(sprite->animation() + 1);
+			}
+		}
+		if (type == "bat") {
+			if (up) {
 				posMonster.y -= 1;
-				up = true;
+				if (map->collisionMoveUp(posMonster, tileSize)) {
+					posMonster.y += 1;
+					up = false;
+				}
+			}
+			else {
+				posMonster.y += 1;
+				glm::ivec2 pos = glm::ivec2(posMonster.x, posMonster.y + 1);//para hacer bien la colision con el suelo
+				if (map->collisionMoveDown(pos, tileSize, &posMonster.y, false)) {
+					posMonster.y -= 1;
+					up = true;
+				}
 			}
 		}
 	}
@@ -157,7 +191,7 @@ void Monster::update(int deltaTime)
 
 void Monster::render()
 {
-	sprite->render();
+	if((type != "vampire" && type != "bat") || casting == false) sprite->render();
 }
 
 void Monster::setTileMap(TileMap* tileMap)

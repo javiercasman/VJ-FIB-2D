@@ -9,6 +9,10 @@
 #include "Player.h"
 #include "Item.h"
 #include "Monster.h"
+#include "HUD.h"
+#include "ShaderManager.h"
+#include <irrKlang.h>
+using namespace irrklang;
 
 
 // Scene contains all the entities of our game.
@@ -24,35 +28,39 @@ public:
 
 	void initItems();
 	void initMonsters();
-	void init();
+	void init(int numLvl);
 	void update(int deltaTime);
 	void render();
-	bool collideEntity(glm::ivec2 entityPos, glm::ivec2 tileSize);
+	bool collideEntity(glm::ivec2 entityPos, glm::ivec2 hitboxSize);
+	void godMode() { player->godMode(); god = true; }
+	bool keyCheat;
+	bool skipCheat;
 	//int setxxxxSpawnTime();
 
 private:
-	void initShaders();
-
-private:
+	bool start, god;
 	TileMap *map;
 	TileMapBackground *map_background;
 	Player *player;
-	ShaderProgram texProgram;
-	float currentTime;
+	HUD* hud;
+	float currentTime, pauseTime, freezeTime;
 	glm::mat4 projection;
 	Item *key;
 	Item *gem;
 	Item *stopwatch;
+	Item* hourglass;
 	//Item *loquesea;
-
+	bool win, lose, next, end, playsong, once;
 	int gemSpawnTime;
 	int stopwatchSpawnTime;
+	int hourglassSpawnTime;
+	bool freeze;//para el stopwatch
 	//int xxxxSpawnTime;
 	int totalPlates, activatedPlates;
-	std::vector<Monster*> monsterList;
-
+	vector<Monster*> monsterList;
+	int remainingTime;
+	ISoundEngine* engine;
 };
 
 
 #endif // _SCENE_INCLUDE
-

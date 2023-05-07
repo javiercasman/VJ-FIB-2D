@@ -3,11 +3,9 @@
 
 
 #include "Scene.h"
-
-
-#define SCREEN_WIDTH 640
-#define SCREEN_HEIGHT 480
-
+#include "Menu.h"
+#include "ShaderManager.h"
+#include "Sound.h"
 
 // Game is a singleton (a class with a single instance) that represents our whole application
 
@@ -29,7 +27,11 @@ public:
 	void init();
 	bool update(int deltaTime);
 	void render();
-	
+	void loseLife();
+	void incrPoints(int add);
+	void nextLevel();
+	void gameover();
+
 	// Input callback methods
 	void keyPressed(int key);
 	void keyReleased(int key);
@@ -41,13 +43,18 @@ public:
 	
 	bool getKey(int key) const;
 	bool getSpecialKey(int key) const;
+	int getLifes() const { return lifes; }
+	int getPoints() const { return points; }
 
 private:
-	bool bPlay;                       // Continue to play game?
-	Scene scene;                      // Scene to render
+	bool bPlay, start, start_level;                // Continue to play game?
+	Scene *scene;                     // Scene to render
+	Menu *menu;
 	bool keys[256], specialKeys[256]; // Store key states so that 
 	                                  // we can have access at any time
-
+	int idMenu, idScene, posIndex, lifes, points;
+	float pauseTime;
+	ISoundEngine* engine;
 };
 
 

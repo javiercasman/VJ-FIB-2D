@@ -1,0 +1,30 @@
+TILEMAP
+gem 16
+stopwatch 10
+hourglass XX
+16 22 							-- Size of tile map in tiles
+32 32						-- Tile size & block size
+images/level02.png 	-- Tilesheet
+7 1
+1111111111111111
+2              2
+1              1
+2    P    5    2
+1              1
+2   33333333   2
+1      11      1
+2      22      2
+1  3333113333  1
+2   V R22 GV   2
+1      11      1
+2 333332233333 2
+1              1
+2              2
+1 33        33 1
+2              2
+1              1
+2 3          3 2
+1  SK       S  1
+2              2
+133333    333331
+2222227777222222
