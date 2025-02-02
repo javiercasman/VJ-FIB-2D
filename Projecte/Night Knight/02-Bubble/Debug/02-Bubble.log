@@ -1,28 +1,28 @@
-﻿C:\Program Files\Microsoft Visual Studio\2022\Enterprise\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(517,5): warning MSB8028: El directorio intermedio (Debug\) contiene archivos compartidos de otro proyecto (02-Bubble.vcxproj, 02-Bubblo.vcxproj). Esto puede dar lugar a un comportamiento incorrecto de limpieza y recompilación.
+﻿C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.CppBuild.targets(531,5): warning MSB8028: El directorio intermedio (Debug\) contiene archivos compartidos de otro proyecto (02-Bubble.vcxproj, 02-Bubblo.vcxproj). Esto puede dar lugar a un comportamiento incorrecto de limpieza y recompilación.
   Game.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   HUD.cpp
   Item.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   Layout.cpp
   main.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   Menu.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   Monster.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   Player.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   Scene.cpp
-D:\VJ\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Scene.cpp(88,20): warning C4018: '<': no coinciden signed/unsigned
-D:\VJ\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Scene.cpp(132,22): warning C4244: '=': conversión de 'float' a 'int'; posible pérdida de datos
-D:\VJ\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Scene.cpp(137,21): warning C4018: '<': no coinciden signed/unsigned
-D:\VJ\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Scene.cpp(246,20): warning C4018: '<': no coinciden signed/unsigned
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   Shader.cpp
   ShaderManager.cpp
   ShaderProgram.cpp
   Sound.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   Sprite.cpp
   Texture.cpp
   TileMap.cpp
+D:\VJ\2D\VJ-FIB-2D\Projecte\Night Knight\02-Bubble\Sound.h(4,10): fatal  error C1083: No se puede abrir el archivo incluir: 'irrKlang.h': No such file or directory
   TileMapBackground.cpp
   Generando código...
-SOIL.lib(image_DXT.obj) : warning LNK4099: no se encontró PDB '' con 'SOIL.lib(image_DXT.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
-SOIL.lib(image_helper.obj) : warning LNK4099: no se encontró PDB '' con 'SOIL.lib(image_helper.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
-SOIL.lib(SOIL.obj) : warning LNK4099: no se encontró PDB '' con 'SOIL.lib(SOIL.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
-SOIL.lib(stb_image_aug.obj) : warning LNK4099: no se encontró PDB '' con 'SOIL.lib(stb_image_aug.obj)' o en ''; se vinculará el objeto sin tener en cuenta información de depuración
-  02-Bubble.vcxproj -> D:\VJ\VJ-FIB-2D\Projecte\Night Knight\Debug\Night Knight.exe
